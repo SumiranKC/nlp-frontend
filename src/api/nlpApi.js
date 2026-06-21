@@ -1,6 +1,6 @@
 // frontend/src/api/nlpApi.js
 
-const BASE_URL = 'https://nlp-dashboard-backend.onrender.com';
+const BASE_URL = 'https://nlp-dashboard-backend.onrender.com/api'; // Update this to your actual backend URL
 
 /**
  * Helper utility to handle standard POST configurations and error parsing
