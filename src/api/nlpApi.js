@@ -1,13 +1,13 @@
-// frontend/src/api/nlpApi.js
+// Ensure there is NO trailing slash here if your endpoints have a leading slash
+const BASE_URL = 'https://nlp-dashboard-backend.onrender.com/api'; 
 
-const BASE_URL = 'https://nlp-dashboard-backend.onrender.com/api/'; // Update this to your actual backend URL
-
-/**
- * Helper utility to handle standard POST configurations and error parsing
- */
 const postRequest = async (endpoint, payload) => {
   try {
-    const response = await fetch(`${BASE_URL}${endpoint}`, {
+    // Manually ensure clean string concatenation without doubling up slashes
+    const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+    const targetUrl = `${BASE_URL}${cleanEndpoint}`;
+
+    const response = await fetch(targetUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -22,24 +22,12 @@ const postRequest = async (endpoint, payload) => {
     return await response.json();
   } catch (error) {
     console.error(`Network failure on ${endpoint}:`, error);
-    throw error; // Pass the error up so the React component can display it to the user
+    throw error;
   }
 };
 
 // --- MODULAR ENDPOINT EXECUTION FUNCTIONS ---
-
-export const apiPreprocessText = (text) => {
-  return postRequest('/preprocess', { text });
-};
-
-export const apiFetchBagOfWords = (text) => {
-  return postRequest('/bag-of-words', { text });
-};
-
-export const apiFetchTfIdf = (docs) => {
-  return postRequest('/tfidf', { docs });
-};
-
-export const apiFetchEmbeddings = (wordA, wordB) => {
-  return postRequest('/embeddings', { wordA, wordB });
-};
+export const apiPreprocessText = (text) => postRequest('/preprocess', { text });
+export const apiFetchBagOfWords = (text) => postRequest('/bag-of-words', { text });
+export const apiFetchTfIdf = (docs) => postRequest('/tfidf', { docs });
+export const apiFetchEmbeddings = (text) => postRequest('/embeddings', { text });
