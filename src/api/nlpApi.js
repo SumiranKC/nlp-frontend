@@ -1,6 +1,6 @@
 // frontend/src/api/nlpApi.js
 
-const BASE_URL = 'http://127.0.0.1:5000/api';
+const BASE_URL = 'https://nlp-dashboard-backend.onrender.com';
 
 /**
  * Helper utility to handle standard POST configurations and error parsing
