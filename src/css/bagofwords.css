@@ -1,0 +1,79 @@
+/* frontend/src/css/bagofwords.css */
+
+.bow-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.bow-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 768px) {
+  .bow-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bow-panel {
+  background: var(--bg-card-alt);
+  padding: 15px;
+  border-radius: 6px;
+  border: 1px solid var(--border-light);
+}
+
+.bow-panel h4 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  color: var(--color-primary);
+  font-size: 1rem;
+  border-bottom: 2px solid var(--border-light);
+  padding-bottom: 6px;
+}
+
+.vocab-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.vocab-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-family: var(--font-code);
+  font-size: 14px;
+}
+
+.vector-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-code);
+  font-size: 14px;
+}
+
+.vector-table th, 
+.vector-table td {
+  border: 1px solid var(--border-default);
+  padding: 8px;
+  text-align: center;
+}
+
+.vector-table th {
+  background-color: var(--color-primary);
+  color: var(--text-light);
+  font-weight: 600;
+}
+
+.vector-table tr:nth-child(even) {
+  background-color: var(--bg-card);
+}
+
+.vector-highlight {
+  color: var(--color-secondary);
+  font-weight: bold;
+}

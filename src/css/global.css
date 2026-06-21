@@ -1,0 +1,47 @@
+/* frontend/src/css/global.css */
+
+:root {
+  /* Typography Variables */
+  --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  --font-code: 'Courier New', Courier, monospace;
+
+  /* Theme Branding Colors */
+  --color-primary: #2c3e50;
+  --color-secondary: #3498db;
+  --color-success: #2ecc71;
+  --color-purple: #9b59b6;
+  --color-danger: #e74c3c;
+
+  /* App Structural/Layout Colors */
+  --bg-body: #f4f6f9;
+  --bg-card: #ffffff;
+  --bg-card-alt: #f8fafc;
+  --text-main: #333333;
+  --text-muted: #7f8c8d;
+  --text-light: #ffffff;
+  --text-nav-link: #b0bec5;
+  --border-default: #cbd5e1;
+  --border-light: #e2e8f0;
+
+  /* Specialized Badge Micro-Colors */
+  --bg-badge-green: #e8f8f5;
+  --text-badge-green: #117a65;
+  --bg-badge-purple: #f5eef8;
+  --text-badge-purple: #6c3483;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-main);
+  background-color: var(--bg-body);
+  color: var(--text-main);
+}
+
+* {
+  box-sizing: border-box;
+}
