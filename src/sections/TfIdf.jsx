@@ -1,60 +1,39 @@
-// frontend/src/sections/TfIdf.jsx
+// src/sections/TfIdf.jsx
 import React, { useState } from 'react';
 import { apiFetchTfIdf } from '../api/nlpApi';
 import '../css/sections.css';
 import '../css/tfidf.css';
 
 const TfIdf = () => {
-  // Tracks the live editing state of the document inputs
   const [docs, setDocs] = useState([
-    "AI models are changing software engineering.",
-    "Software engineering relies on clean code."
+    "Natural Language Processing builds smart dashboard tools.",
+    "Data scientists train deep learning computer algorithms.",
+    "Dashboard applications help map visual coordinate interfaces."
   ]);
-
+  const [vocabulary, setVocabulary] = useState([]);
   const [matrix, setMatrix] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Derive exactly how many documents were processed in the last successful calculation
-  const calculatedDocCount = matrix.length > 0 ? matrix[0].tfs.length : 0;
-
-  // Document array item text updater
-  const handleDocTextChange = (index, val) => {
-    const updatedDocs = [...docs];
-    updatedDocs[index] = val;
-    setDocs(updatedDocs);
+  const updateDocText = (index, value) => {
+    const updated = [...docs];
+    updated[index] = value;
+    setDocs(updated);
   };
 
-  // Add an entry up to a maximum limit of 5 documents
-  const addDocumentSlot = () => {
-    if (docs.length < 5) {
-      setDocs([...docs, ""]);
-    }
-  };
-
-  // Delete an entry and ensure at least 1 document remains
-  const removeDocumentSlot = (indexToRemove) => {
-    if (docs.length > 1) {
-      const filteredDocs = docs.filter((_, idx) => idx !== indexToRemove);
-      setDocs(filteredDocs);
-    }
-  };
-
-  // Manual explicit click action routine to call the Python backend
-  const triggerMatrixCalculation = async () => {
-    if (!docs.some(d => d.trim())) {
-      setError("Please ensure at least one document contains functional text words before executing.");
-      return;
-    }
+  const calculateTfIdfWeights = async () => {
+    const activeDocs = docs.filter(d => d.trim().length > 0);
+    if (activeDocs.length === 0) return;
 
     setLoading(true);
     setError(null);
-    
+
     try {
-      const data = await apiFetchTfIdf(docs);
+      const data = await apiFetchTfIdf(activeDocs);
+      setVocabulary(data.vocabulary || []);
       setMatrix(data.matrix || []);
     } catch (err) {
-      setError(err.message);
+      setError(`Pipeline Error: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -63,102 +42,61 @@ const TfIdf = () => {
   return (
     <div id="tf-idf" className="section-wrapper">
       <section className="nlp-section">
-        <h2>📈 TF-IDF Matrix</h2>
-        <p className="section-subtitle">Evaluate document weights flexibly. Scale corpus lists manually and process data dynamically via Python.</p>
+        <h2>🧮 TF-IDF Importance Matrix</h2>
+        <p className="section-subtitle">Compare relative term value weights across multiple distinct document sets simultaneously.</p>
         
-        <div className="section-card tfidf-container">
-          
-          {/* Dynamic Document Grid Container */}
-          <div className="docs-grid">
-            {docs.map((docText, index) => (
-              <div key={index} className="doc-input-box">
-                <div className="doc-header-row">
-                  <label htmlFor={`docInput_${index}`}>Document {index + 1}:</label>
-                  {docs.length > 1 && (
-                    <button 
-                      type="button"
-                      className="btn-delete" 
-                      onClick={() => removeDocumentSlot(index)}
-                    >
-                      Delete
-                    </button>
-                  )}
-                </div>
-                <textarea 
-                  id={`docInput_${index}`}
-                  value={docText} 
-                  onChange={(e) => handleDocTextChange(index, e.target.value)} 
-                  className="tfidf-textarea"
-                  placeholder="Type textual data values here..."
-                />
-              </div>
-            ))}
-          </div>
+        <div className="section-card tfidf-grid-container">
+          {/* Dynamic Multi-document Inputs */}
+          {docs.map((doc, idx) => (
+            <div key={idx} className="doc-input-row">
+              <span className="input-count-badge">Doc {idx + 1}</span>
+              <input 
+                type="text"
+                value={doc}
+                onChange={(e) => updateDocText(idx, e.target.value)}
+                className="token-input-field"
+                placeholder={`Document text dataset element ${idx + 1}...`}
+                style={{ flex: 1, margin: 0 }}
+              />
+            </div>
+          ))}
 
-          {/* Action Operation Dashboard Panel */}
-          <div className="doc-controls">
-            <button 
-              type="button"
-              className="btn-add" 
-              onClick={addDocumentSlot}
-              disabled={docs.length >= 5}
-            >
-              {docs.length >= 5 ? "Max Limit (5) Reached" : "+ Add Document Slot"}
-            </button>
-            
-            <button 
-              type="button"
-              className="btn-calculate" 
-              onClick={triggerMatrixCalculation}
-              disabled={loading}
-            >
-              {loading ? "Computing Matrices..." : "Calculate TF-IDF"}
-            </button>
-          </div>
+          <button 
+            type="button" 
+            className="btn-primary"
+            onClick={calculateTfIdfWeights}
+            disabled={loading}
+          >
+            {loading ? "Computing Importance Vectors..." : "Compute TF-IDF Matrix"}
+          </button>
 
-          {error && <p className="empty-tokens-text" style={{ color: 'var(--color-danger)' }}>⚠️ Execution Refused: {error}</p>}
+          {error && <p className="empty-tokens-text" style={{ color: 'var(--color-danger)' }}>{error}</p>}
 
-          {/* Dynamic Result Data Table Intercept Matrix */}
-          <div className="matrix-wrapper" style={{ opacity: loading ? 0.5 : 1 }}>
-            {matrix.length > 0 ? (
-              <table className="matrix-table">
+          {/* Interactive Term Frequency Comparison Matrix Grid */}
+          {vocabulary.length > 0 && matrix.length > 0 && (
+            <div className="matrix-table-wrapper">
+              <table className="tokens-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
-                  <tr>
-                    <th>Token Term</th>
-                    {/* Generates TF column headers based strictly on calculated history */}
-                    {Array.from({ length: calculatedDocCount }).map((_, idx) => (
-                      <th key={`tf_head_${idx}`} className="center-align">TF (D{idx + 1})</th>
-                    ))}
-                    <th className="center-align">DF Count</th>
-                    <th className="center-align">IDF Weight</th>
-                    {/* Generates TF-IDF column headers based strictly on calculated history */}
-                    {Array.from({ length: calculatedDocCount }).map((_, idx) => (
-                      <th key={`tfidf_head_${idx}`} className="center-align">TF-IDF (D{idx + 1})</th>
+                  <tr style={{ background: '#334155', color: '#fff' }}>
+                    <th style={{ padding: '10px', textAlign: 'left', border: '1px solid #475569' }}>Unique Token Index</th>
+                    {matrix.map((_, docIdx) => (
+                      <th key={docIdx} style={{ padding: '10px', textAlign: 'center', border: '1px solid #475569' }}>Doc {docIdx + 1} Weight</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {matrix.map((row) => (
-                    <tr key={row.word}>
-                      <td><strong>{row.word}</strong></td>
-                      {/* Loop over calculated term frequencies */}
-                      {row.tfs.map((tfValue, idx) => (
-                        <td key={`tf_val_${idx}`} className="center-align">{tfValue}</td>
-                      ))}
-                      
-                      {/* Displays DF using the calculation-time total document count */}
-                      <td className="center-align">{row.df} / {calculatedDocCount}</td>
-                      <td className="center-align">{row.idf.toFixed(3)}</td>
-                      
-                      {/* Loop over calculated weights and apply styling conditional maps */}
-                      {row.tfidfs.map((tfidfValue, idx) => {
-                        const isUniqueImportanceTerm = tfidfValue > 0 && row.df === 1;
+                  {vocabulary.map((term, termIdx) => (
+                    <tr key={term} style={{ borderBottom: '1px solid #334155' }}>
+                      <td style={{ padding: '10px', fontFamily: 'var(--font-code)', border: '1px solid #334155' }}>"{term}"</td>
+                      {matrix.map((docVector, docIdx) => {
+                        const val = docVector[termIdx];
                         return (
                           <td 
-                            key={`tfidf_val_${idx}`} 
-                            className={`center-align ${isUniqueImportanceTerm ? 'weight-high' : 'weight-low'}`}
+                            key={docIdx} 
+                            style={{ padding: '10px', textAlign: 'center', border: '1px solid #334155' }}
+                            className={val > 0 ? "matrix-cell-highlight" : "matrix-cell-zero"}
                           >
-                            {tfidfValue.toFixed(3)}
+                            {val}
                           </td>
                         );
                       })}
@@ -166,13 +104,8 @@ const TfIdf = () => {
                   ))}
                 </tbody>
               </table>
-            ) : (
-              <p className="empty-tokens-text" style={{ textAlign: 'center', margin: '20px 0' }}>
-                💡 Click the <strong>Calculate TF-IDF</strong> button above to stream your active document metrics to Python.
-              </p>
-            )}
-          </div>
-
+            </div>
+          )}
         </div>
       </section>
     </div>
