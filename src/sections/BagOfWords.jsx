@@ -3,28 +3,23 @@ import React, { useState } from 'react';
 import { apiFetchBagOfWords } from '../api/nlpApi';
 import '../css/sections.css';
 
-// Accepts the clean token array passed down from the parent state container
-const BagOfWords = ({ preprocessedTokens = [] }) => {
+const BagOfWords = () => {
+  const [text, setText] = useState("The quick brown fox jumps over the lazy dog. The dog was not amused.");
   const [vocab, setVocab] = useState([]);
   const [vector, setVector] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const calculateBagOfWordsMatrix = async () => {
-    // 🛡️ Error protection handler if Section 1 hasn't been run yet
-    if (!preprocessedTokens || preprocessedTokens.length === 0) {
-      setError("No active tokens found! Please process text in the Preprocessing section above first.");
-      setVocab([]);
-      setVector([]);
-      return;
-    }
+    if (!text.trim()) return;
 
     setLoading(true);
     setError(null);
 
     try {
-      // Stream the clean tokens array straight across the internet to Render
-      const data = await apiFetchBagOfWords(preprocessedTokens);
+      // Send the raw text string straight across the internet to Render
+      // The backend will handle the preprocessing steps before calculating the counts
+      const data = await apiFetchBagOfWords(text);
       setVocab(data.vocab || []);
       setVector(data.vector || []);
     } catch (err) {
@@ -39,41 +34,35 @@ const BagOfWords = ({ preprocessedTokens = [] }) => {
       <section className="nlp-section">
         <h2>📊 Bag of Words Model</h2>
         <p className="section-subtitle">
-          Transform your preprocessed tokens into a numerical frequency vector mapping active structural occurrences.
+          Input your raw text below. The system will automatically preprocess it (remove stopwords/punctuation) and compile the numerical frequency vector space mapping.
         </p>
         
         <div className="section-card">
-          {/* Active Token Monitoring Box */}
-          <div style={{ marginBottom: '20px' }}>
-            <span className="section-label">Active Preprocessed Inputs:</span>
-            <div className="tokens-display-box" style={{ background: '#1e293b', padding: '12px', borderRadius: '6px', minHeight: '48px', marginTop: '6px' }}>
-              {preprocessedTokens.length > 0 ? (
-                preprocessedTokens.map((token, idx) => (
-                  <span key={idx} className="token-badge" style={{ backgroundColor: '#3b82f6', margin: '2px', display: 'inline-block' }}>
-                    {token}
-                  </span>
-                ))
-              ) : (
-                <span style={{ color: '#64748b', fontSize: '14px', fontStyle: 'italic' }}>
-                  ⚠️ Pipeline Empty. Process input text in Section 1 above to load token arrays.
-                </span>
-              )}
-            </div>
+          {/* Dedicated Textarea Input for this section */}
+          <div style={{ marginBottom: '16px' }}>
+            <label htmlFor="bowInput" className="section-label">Input Corpus Text:</label>
+            <textarea 
+              id="bowInput"
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              className="preprocessing-textarea"
+              placeholder="Type your sentences here to generate a frequency matrix..."
+            />
           </div>
 
-          {/* Action Execution Pipeline Trigger */}
+          {/* Action Execution Trigger Button */}
           <button 
             type="button" 
             className="btn-primary"
             onClick={calculateBagOfWordsMatrix}
             disabled={loading}
           >
-            {loading ? "Computing Frequency Vectors..." : "Generate Bag of Words Vector"}
+            {loading ? "Processing & Computing Vectors..." : "Generate Bag of Words Vector"}
           </button>
 
           {error && <p className="empty-tokens-text" style={{ color: 'var(--color-danger)', marginTop: '12px' }}>{error}</p>}
 
-          {/* Vector Array Output Presentation Grid */}
+          {/* Re-implemented Vector Array Presentation Table */}
           {vocab.length > 0 && (
             <div style={{ marginTop: '24px' }}>
               <h3 className="section-label">Generated Vector Space Mapping:</h3>
